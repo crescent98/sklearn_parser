@@ -6,25 +6,31 @@ from xlwt import Workbook
 from xlrd import open_workbook
 from xlutils.copy import copy
 
-                
-def find_algo_name(str_str):
-
-    t=str_str.find("html")
-    str_str=str_str[:t]
-    str_lst=str_str.split('.')
-    str_lst=[v for v in str_lst if v]
-    print(str_lst)
-    return str_lst[-1]
-
 if __name__=="__main__":
-    root_dir="/home/shmoon/algorithm_parameter_parser/html/"
-    wb=xlwt.Workbook(encoding='utf-8')
+    root_dir="/home/shmoon/algorithm_parameter_parser/html"
     for(root, dirs,files) in os.walk(root_dir):
         if len(files) > 0:
             for file_name in files:
-                html_title=file_name
-                print(html_title)
-                with open(root_dir+html_title,'r',-1,"utf-8") as fp:
+                
+from bs4 import BeautifulSoup
+import sys
+import os
+
+if __name__=="__main__":
+    root_dir="/home/shmoon/algorithm_parameter_parser/html"
+    for(root, dirs,files) in os.walk(root_dir):
+        if len(files) > 0:
+            for file_name in files:
+                try:
+                    
+                    html_title=sys.argv[2]
+                    algo_name=sys.argv[1]
+                except NameError:
+                    print("PLEASE PUT HTML FILE")
+                    exit()
+
+    
+                with open(html_title,'r',-1,"utf-8") as fp:
                     soup=BeautifulSoup(fp,'html.parser')
                     all_divs=soup.find('dl',{'class':'field-list'})
 
@@ -76,14 +82,13 @@ if __name__=="__main__":
                     b_e=tag_type[i].find('}')
                     
                     if(b_s!=-1):
-                        temp=tag_type[i][b_s+1:b_e]
-                        
-                        for j in temp.split(','):
-                            strings[i].append(j)
-                            temp2=tag_type[i][:b_s]+tag_type[i][b_e+1:]
-                            temp2=temp2.replace('or',',').split(',')
-                            types[i]=[v.strip()+', ' for v in temp2 if not not v.split()]
-                            types[i].append('string')
+                temp=tag_type[i][b_s+1:b_e]
+                for j in temp.split(','):
+                    strings[i].append(j)
+                    temp2=tag_type[i][:b_s]+tag_type[i][b_e+1:]
+                    temp2=temp2.replace('or',',').split(',')
+                    types[i]=[v.strip()+', ' for v in temp2 if not not v.split()]
+                    types[i].append('string')
                     else:
                         temp2=tag_type[i]
                         temp2=temp2.replace('or',',').split(',')
@@ -106,9 +111,10 @@ if __name__=="__main__":
                         nones[i].append('False')
                         defaults[i].append(temp)
 
-                
-                algo_name=find_algo_name(html_title)
-                sheet1=wb.add_sheet(algo_name)
+
+                rb=open_workbook("Algorithm_parameter_info.xls")
+                wb=copy(rb)
+                sheet1=wb.add_sheet(sys.argv[1])
                 sheet1.write(3,0,"파라메터 번호")
                 sheet1.write(3,1,"파라메터 이름")
                 sheet1.write(3,2,"types")
@@ -126,5 +132,4 @@ if __name__=="__main__":
                     sheet1.write(i+4,4,defaults[i])
                     sheet1.write(i+4,5,nones[i])
 
-wb.save("/home/shmoon/algorithm_parameter_parser/xls/algo_info.xls")
-                
+                wb.save("Algorithm_parameter_info.xls")
