@@ -13,7 +13,6 @@ def find_algo_name(str_str):
     str_str=str_str[:t]
     str_lst=str_str.split('.')
     str_lst=[v for v in str_lst if v]
-    print(str_lst)
     return str_lst[-1]
 
 if __name__=="__main__":
@@ -23,7 +22,6 @@ if __name__=="__main__":
         if len(files) > 0:
             for file_name in files:
                 html_title=file_name
-                print(html_title)
                 with open(root_dir+html_title,'r',-1,"utf-8") as fp:
                     soup=BeautifulSoup(fp,'html.parser')
                     all_divs=soup.find('dl',{'class':'field-list'})
@@ -75,16 +73,18 @@ if __name__=="__main__":
                     b_s=tag_type[i].find('{')
                     b_e=tag_type[i].find('}')
                     
-                    if(b_s!=-1):
+                    if(b_s!=-1): # if string is included
                         temp=tag_type[i][b_s+1:b_e]
-                        
                         for j in temp.split(','):
+                            # to put commas instead of blanks
+                            j=j.replace('’','’,')
+                            j=j.replace('”','”,')
                             strings[i].append(j)
                             temp2=tag_type[i][:b_s]+tag_type[i][b_e+1:]
                             temp2=temp2.replace('or',',').split(',')
                             types[i]=[v.strip()+', ' for v in temp2 if not not v.split()]
                             types[i].append('string')
-                    else:
+                    else: # if string is not included
                         temp2=tag_type[i]
                         temp2=temp2.replace('or',',').split(',')
                         types[i]=[v.strip()+', ' for v in temp2 if not not v.split()]
